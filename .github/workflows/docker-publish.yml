@@ -36,6 +36,7 @@ jobs:
           CACHE_REF="ghcr.io/aug6th/mini-dashboard:cache"
 
           docker buildx build \
+            --platform linux/arm64 \
             --provenance=false \
             --cache-from "type=registry,ref=${CACHE_REF}" \
             --cache-to "type=registry,ref=${CACHE_REF},mode=max" \
