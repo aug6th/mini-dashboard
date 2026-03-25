@@ -1,0 +1,27 @@
+# Build stage
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+
+RUN corepack enable
+
+COPY package.json yarn.lock .yarnrc.yml ./
+COPY .yarn/releases .yarn/releases
+RUN yarn install --immutable
+
+COPY . .
+
+ARG VITE_HUBSPOT_PORTAL_ID=25945010
+ARG VITE_HUBSPOT_FORM_GUID=991e2a09-77c2-4428-9242-ebf26bfc6c64
+ENV VITE_HUBSPOT_PORTAL_ID=$VITE_HUBSPOT_PORTAL_ID
+ENV VITE_HUBSPOT_FORM_GUID=$VITE_HUBSPOT_FORM_GUID
+
+RUN yarn build
+
+# Run stage
+FROM nginx:1.27-alpine
+
+COPY --from=builder /app/build /usr/share/nginx/html
+
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
